@@ -104,8 +104,9 @@ bzw. Microsoft die Session zurückzieht. Danach einmal neu auslesen.
 
 1. **Konto hinzufügen** → Dienst **become.1** wählen.
 2. Im Login-Dialog eingeben:
-   - **Benutzername:** leer lassen (Konto heißt dann „become.1 Card") oder ein eigener
-     Kontoname.
+   - **Benutzername:** der gewünschte Kontoname, z. B. `become.1 Card`. MoneyMoney besteht
+     auf einer Eingabe („Benutzername fehlt."), auch wenn die Extension das Feld nur als
+     Anzeigename verwendet — eine Anmeldung findet damit nicht statt.
    - **Passwort:** der Firebase Refresh-Token von oben.
 
 ## API-Details

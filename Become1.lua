@@ -12,7 +12,8 @@
 --
 -- Login in MoneyMoney:
 --   Bankleitzahl/Dienst: become.1
---   Benutzername:        optional ein eigener Kontoname (leer = "become.1 Card")
+--   Benutzername:        Kontoname, z.B. "become.1 Card". Dient nur der Anzeige, MoneyMoney
+--                        verlangt aber eine nicht-leere Eingabe.
 --   Passwort:            Firebase Refresh-Token (siehe README.md)
 
 WebBanking{
