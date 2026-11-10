@@ -118,6 +118,13 @@ Introspection ist auf dem Endpunkt abgeschaltet.
   mit `grant_type=refresh_token&refresh_token=…` → `id_token` (JWT, 1 h).
   Firebase-Projekt: `become1-prod`, Web-API-Key `AIzaSyCQmxu5BULN61MH-r2qCpryqas0rXkUVjE`.
 
+  > Dieser Key ist **kein Secret**, auch wenn Secret-Scanner beim Muster `AIza…` anschlagen.
+  > Firebase-Web-API-Keys sind per Design öffentlich: Der Key steht im `firebaseConfig` des
+  > JavaScript-Bundles von `app.become1.de` und liegt damit jedem vor, der die Web-App im
+  > Browser öffnet. Er identifiziert das Firebase-Projekt und berechtigt zu nichts — an den
+  > Identity-Endpunkten braucht es zusätzlich ein gültiges Credential. Das eigentliche
+  > Geheimnis ist der Refresh-Token, und der gehört in keinen Commit.
+
 - **GraphQL-Endpunkt:** `POST https://api.become1.de/graphql`
   Header `Authorization: <JWT>` — die Web-App sendet das Token **ohne** `Bearer `-Präfix
   (mit Präfix funktioniert es ebenfalls).
