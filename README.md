@@ -42,12 +42,44 @@ So liest du ihn aus:
 3. Diesen Snippet ausführen:
 
    ```js
-   const db = await new Promise(r => { const q = indexedDB.open('firebaseLocalStorageDb'); q.onsuccess = () => r(q.result); });
-   const rec = await new Promise(r => { const q = db.transaction('firebaseLocalStorage').objectStore('firebaseLocalStorage').getAll(); q.onsuccess = () => r(q.result[0].value); });
-   copy(rec.stsTokenManager.refreshToken);   // liegt jetzt in der Zwischenablage
+   await (async () => {
+     const get = v => v?.stsTokenManager?.refreshToken;
+     let token, quelle;
+
+     // Firebase speichert die Session je nach Persistenz in localStorage oder IndexedDB
+     const lsKey = Object.keys(localStorage).find(k => k.startsWith('firebase:authUser:'));
+     if (lsKey) { try { token = get(JSON.parse(localStorage[lsKey])); quelle = 'localStorage'; } catch {} }
+
+     if (!token && (await indexedDB.databases()).some(d => d.name === 'firebaseLocalStorageDb')) {
+       const db = await new Promise(r => { const q = indexedDB.open('firebaseLocalStorageDb'); q.onsuccess = () => r(q.result); });
+       if (db.objectStoreNames.contains('firebaseLocalStorage')) {
+         const rows = await new Promise(r => { const q = db.transaction('firebaseLocalStorage').objectStore('firebaseLocalStorage').getAll(); q.onsuccess = () => r(q.result); });
+         const rec = rows.map(r => r.value).find(get);
+         if (rec) { token = get(rec); quelle = 'IndexedDB (' + rec.providerData?.map(p => p.providerId).join(', ') + ')'; }
+       }
+     }
+
+     if (!token) {
+       console.error('Kein Refresh-Token gefunden auf ' + location.origin +
+         '. Bist du auf https://app.become1.de und dort eingeloggt?');
+       return;
+     }
+     copy(token);
+     console.log('Refresh-Token aus ' + quelle + ' in der Zwischenablage (' + token.length + ' Zeichen).');
+   })();
    ```
 
 4. Den Token als **Passwort** in MoneyMoney hinterlegen.
+
+Wenn der Snippet „Kein Refresh-Token gefunden" meldet oder `Cannot read properties of
+undefined` wirft, ist die Firebase-Session im aktuellen Tab nicht da. Übliche Ursachen:
+
+- Der Tab steht nicht auf `app.become1.de` (die Hilfeseiten unter `help.become1.de` und die
+  Microsoft-Loginseite haben jeweils einen eigenen Origin mit eigenem Speicher).
+- Du bist in einem anderen Browser oder Browser-Profil eingeloggt als in dem Tab, in dem der
+  Snippet läuft.
+- Die Seite war noch nicht fertig geladen — einmal neu laden, bis die Karten-Übersicht steht,
+  und den Snippet erneut ausführen.
 
 Der Token ist ein vollwertiges Zugangsmerkmal zu deinem become.1-Account — behandle ihn wie
 ein Passwort. Er bleibt gültig, bis du dich abmeldest, das Passwort änderst oder become.1
